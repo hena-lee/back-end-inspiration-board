@@ -1,4 +1,5 @@
 from app import db
+from flask import current_app
 
 class Board(db.Model):
     board_id = db.Column(db.Integer, primary_key=True)
