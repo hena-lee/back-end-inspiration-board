@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, make_response
 from app import db
 from app.models.card import Card
 from app.models.board import Board
-# example_bp = Blueprint('example_bp', __name__)
+
 card_bp = Blueprint("card", __name__, url_prefix="/cards")
 board_bp = Blueprint("board", __name__, url_prefix="/boards")
 
@@ -16,10 +16,80 @@ def create_board():
                     owner=request_body["owner"])  
     db.session.add(new_board)
     db.session.commit()
-    return jsonify("Successful"), 201
+    return jsonify(board= f'Board "{new_board.title}"Successfully created board'), 201
 
 @board_bp.route("", methods=["GET"], strict_slashes=False)
 def view_boards():
     boards=Board.query.all()
     view_boards=[board.to_json() for board in boards if boards]
     return jsonify(view_boards), 200
+
+@board_bp.route("/<board_id>", methods=["GET"], strict_slashes=False)
+def view_single_board(board_id):
+    board = Board.query.get_or_404(board_id)
+    return jsonify(board_id=board.board_id, title=board.title, owner=board.owner)  
+
+@board_bp.route("/<board_id>/cards", methods=["GET"], strict_slashes=False)
+def view_cards_in_board(board_id):
+    board = Board.query.get_or_404(board_id)
+    cards = Card.query.filter_by(board_id=int(board_id))
+    cards_in_board = [card.to_json() for card in cards if cards]
+    return jsonify(board_id=int(board_id), title=board.title, cards=cards_in_board)
+
+@board_bp.route("/<board_id>/cards", methods=["POST"], strict_slashes=False)
+def create_card_in_board(board_id):
+    request_body = request.get_json()
+    if ("message" not in request_body 
+        # or "likes_count" not in request_body
+        # (new message shouldn't have capability of increasing likes_count)
+        # or "board_id" not in request_body 
+        # (does the user still need to input board_id if it's included in URL?)
+        ):  
+        return jsonify(details = f'Invalid data'), 400
+    new_card_in_board = Card(message=request_body["message"],
+                            likes_count=request_body["likes_count"],
+                            board_id=board_id)
+    db.session.add(new_card_in_board)
+    db.session.commit()
+    return jsonify(new_card_in_board.to_json()), 200
+
+###############################################################
+
+@card_bp.route("/<card_id>/like", methods=["PUT"], strict_slashes=False)
+def update_card(card_id):
+    card = Card.query.get_or_404(card_id)
+    # we don't need any data in the request body, 
+    # just need request sent from user to this endpoint
+    card.likes_count += 1
+    db.session.commit()
+    return jsonify(card=card.to_json())
+
+@card_bp.route("/<card_id>", methods=["DELETE"], strict_slashes=False)
+def delete_card(card_id):
+    card = Card.query.get_or_404(card_id)
+    db.session.delete(card)
+    db.session.commit()
+    return jsonify(card = f'Card {card.card_id} "{card.message}" successfully deleted')
+
+
+# @board_bp.route("/<board_id>", methods=["DELETE"], strict_slashes=False)
+# def delete_board(board_id):
+#     board = Board.query.get_or_404(board_id)
+#     # why don't cards in board get deleted when boards get deleted?
+#     cards = Card.query.filter_by(board_id=int(board_id))
+#     for card in cards:
+#         db.session.delete(card)
+#     db.session.delete(board)
+#     db.session.commit()
+#     return jsonify(board = f'Board {board.board_id} "{board.title}" successfully deleted')
+
+# @board_bp.route("", methods=["DELETE"], strict_slashes=False)
+# def delete_all_board():
+#     boards = Board.query.all()
+#     cards = Card.query.all()
+#     for board in boards:
+#         db.session.delete(board)
+#     for card in cards:
+#         db.session.delete(card)
+#     db.session.commit()
+#     return jsonify(board = f'All boards successfully deleted'), 200
