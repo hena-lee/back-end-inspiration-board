@@ -39,11 +39,9 @@ def view_cards_in_board(board_id):
 @board_bp.route("/<board_id>/cards", methods=["POST"], strict_slashes=False)
 def create_card_in_board(board_id):
     request_body = request.get_json()
-    if ("message" not in request_body 
-        # or "likes_count" not in request_body
         # (new message shouldn't have capability of increasing likes_count)
-        # or "board_id" not in request_body 
-        # (does the user still need to input board_id if it's included in URL?)
+        # (does the user still need to input board_id if it's included in URL?) YES in Front end not in back end = in the form body
+    if ("message" not in request_body 
         ):  
         return jsonify(details = f'Invalid data'), 400
     new_card_in_board = Card(message=request_body["message"],
@@ -57,7 +55,10 @@ def create_card_in_board(board_id):
 
 @card_bp.route("/<card_id>/like", methods=["PUT"], strict_slashes=False)
 def update_card(card_id):
-    card = Card.query.get_or_404(card_id)
+    # Because cards are all displayed at this point, user can only click the like or not click so the cards are there, we still need to modify card and that's why we query it
+
+    card = Card.query.get(card_id)
+
     # we don't need any data in the request body, 
     # just need request sent from user to this endpoint
     card.likes_count += 1
