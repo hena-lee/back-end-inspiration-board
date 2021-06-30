@@ -111,24 +111,24 @@ def view_cards_in_board(board_id):
 # MAY OR MAY NOT IMPLEMENT BELOW:
 #########################################################################
 
-# @board_bp.route("/<board_id>", methods=["DELETE"], strict_slashes=False)
-# def delete_board(board_id):
-#     board = Board.query.get_or_404(board_id)
-#     # why don't cards in board get deleted when boards get deleted?
-#     cards = Card.query.filter_by(board_id=int(board_id))
-#     for card in cards:
-#         db.session.delete(card)
-#     db.session.delete(board)
-#     db.session.commit()
-#     return jsonify(board = f'Board {board.board_id} "{board.title}" successfully deleted')
+@board_bp.route("/<board_id>", methods=["DELETE"], strict_slashes=False)
+def delete_board(board_id):
+    board = Board.query.get_or_404(board_id)
+    # why don't cards in board get deleted when boards get deleted?
+    cards = Card.query.filter_by(board_id=int(board_id))
+    for card in cards:
+        db.session.delete(card)
+    db.session.delete(board)
+    db.session.commit()
+    return jsonify(board = f'Board {board.board_id} "{board.title}" successfully deleted')
 
-# @board_bp.route("", methods=["DELETE"], strict_slashes=False)
-# def delete_all_board():
-#     boards = Board.query.all()
-#     cards = Card.query.all()
-#     for board in boards:
-#         db.session.delete(board)
-#     for card in cards:
-#         db.session.delete(card)
-#     db.session.commit()
-#     return jsonify(board = f'All boards successfully deleted'), 200
+@board_bp.route("", methods=["DELETE"], strict_slashes=False)
+def delete_all_board():
+    boards = Board.query.all()
+    cards = Card.query.all()
+    for board in boards:
+        db.session.delete(board)
+    for card in cards:
+        db.session.delete(card)
+    db.session.commit()
+    return jsonify(board = f'All boards successfully deleted'), 200
