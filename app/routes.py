@@ -33,12 +33,12 @@ def view_single_board(board_id):
     board = Board.query.get_or_404(board_id)
     return jsonify(board_id=board.board_id, title=board.title, owner=board.owner)  
 
-@board_bp.route("/<board_id>/cards", methods=["GET"], strict_slashes=False)
-def view_cards_in_board(board_id):
-    board = Board.query.get_or_404(board_id)
-    cards = Card.query.filter_by(board_id=int(board_id))
-    cards_in_board = [card.to_json() for card in cards if cards]
-    return jsonify(board_id=int(board_id), title=board.title, cards=cards_in_board)
+# @board_bp.route("/<board_id>/cards", methods=["GET"], strict_slashes=False)
+# def view_cards_in_board(board_id):
+#     board = Board.query.get_or_404(board_id)
+#     cards = Card.query.filter_by(board_id=int(board_id))
+#     cards_in_board = [card.to_json() for card in cards if cards]
+#     return jsonify(board_id=int(board_id), title=board.title, cards=cards_in_board)
 
 @board_bp.route("/<board_id>/cards", methods=["POST"], strict_slashes=False)
 def create_card_in_board(board_id):
@@ -79,39 +79,36 @@ def delete_card(card_id):
 # STRETCH 
 ########################################################################
 
-@board_bp.route("/<board_id>/cards", methods=["GET"], strict_slashes=False)
-def view_cards_in_board_by_query(board_id):
 
-    #  i have a board which has cards
+@board_bp.route("/<board_id>/cards", methods=["GET"], strict_slashes=False)
+def view_cards_in_board(board_id):
     board = Board.query.get_or_404(board_id)
-    # and its cards
+
     cards = board.cards # [{}, {}, {}]
-    
+    cards_in_board = [card.to_json() for card in cards if cards]
+    print(cards)
+    # cards = Card.query.filter_by(board_id=int(board_id)) # if filtering by id
+
     # this is asc, desc or id (which is cards?? fuzzy on this)
     sort_by = request.args.get("sort") 
 
     # once I have all cards of that board I order them by specified request
     if sort_by == "asc":  
         # # this is a list (queried by likes_count) in asc order
-
-        # cards = Card.query.order_by(Card.likes_count.asc()).all() 
-
-        #  or should I do this
-        cards = cards.order_by(Card.likes_count.asc())
-        # likes_asc = cards.order_by(Card.likes_count.asc()).all()
+        cards_in_board = sorted(cards_in_board, key = lambda i: i['likes_count'])        
 
     elif sort_by == "desc":
         # this is a list (queried by title) in desc order
-        cards = cards.order_by(Card.likes_count.desc())
+        cards_in_board = sorted(cards_in_board, key = lambda i: i['likes_count'], reverse=True)        
+
         
     elif sort_by == "id":
-        # list, queried by id in asc order:
-        cards = cards.order_by(Card.card_id.asc())
-        # cards = cards.order_by(Card.card_id.asc()).all()  
+        cards_in_board = sorted(cards_in_board, key = lambda i: i['card_id'])        
 
-        card_response = [card.to_json() \
-                for card in cards]
-    return jsonify(card_response), 200
+    elif sort_by == "message":
+        cards_in_board = sorted(cards_in_board, key = lambda i: i['message'])    
+
+    return jsonify(board_id=int(board_id), title=board.title, cards=cards_in_board)
 
 
 
@@ -119,24 +116,24 @@ def view_cards_in_board_by_query(board_id):
 # MAY OR MAY NOT IMPLEMENT BELOW:
 #########################################################################
 
-# @board_bp.route("/<board_id>", methods=["DELETE"], strict_slashes=False)
-# def delete_board(board_id):
-#     board = Board.query.get_or_404(board_id)
-#     # why don't cards in board get deleted when boards get deleted?
-#     cards = Card.query.filter_by(board_id=int(board_id))
-#     for card in cards:
-#         db.session.delete(card)
-#     db.session.delete(board)
-#     db.session.commit()
-#     return jsonify(board = f'Board {board.board_id} "{board.title}" successfully deleted')
+@board_bp.route("/<board_id>", methods=["DELETE"], strict_slashes=False)
+def delete_board(board_id):
+    board = Board.query.get_or_404(board_id)
+    # why don't cards in board get deleted when boards get deleted?
+    cards = Card.query.filter_by(board_id=int(board_id))
+    for card in cards:
+        db.session.delete(card)
+    db.session.delete(board)
+    db.session.commit()
+    return jsonify(board = f'Board {board.board_id} "{board.title}" successfully deleted')
 
-# @board_bp.route("", methods=["DELETE"], strict_slashes=False)
-# def delete_all_board():
-#     boards = Board.query.all()
-#     cards = Card.query.all()
-#     for board in boards:
-#         db.session.delete(board)
-#     for card in cards:
-#         db.session.delete(card)
-#     db.session.commit()
-#     return jsonify(board = f'All boards successfully deleted'), 200
+@board_bp.route("", methods=["DELETE"], strict_slashes=False)
+def delete_all_board():
+    boards = Board.query.all()
+    cards = Card.query.all()
+    for board in boards:
+        db.session.delete(board)
+    for card in cards:
+        db.session.delete(card)
+    db.session.commit()
+    return jsonify(board = f'All boards successfully deleted'), 200
