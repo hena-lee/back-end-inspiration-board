@@ -86,31 +86,33 @@ def view_cards_in_board_by_query(board_id):
     board = Board.query.get_or_404(board_id)
     # and its cards
     cards = board.cards # [{}, {}, {}]
-    
     # this is asc, desc or id (which is cards?? fuzzy on this)
     sort_by = request.args.get("sort") 
 
     # once I have all cards of that board I order them by specified request
     if sort_by == "asc":  
+        print(cards)
         # # this is a list (queried by likes_count) in asc order
 
         # cards = Card.query.order_by(Card.likes_count.asc()).all() 
 
         #  or should I do this
-        cards = cards.order_by(Card.likes_count.asc())
+        # cards = cards.order_by(Card.likes_count.asc()).all()
         # likes_asc = cards.order_by(Card.likes_count.asc()).all()
+        cards = cards.sorted(cards.items, key=lambda x: x[1], reverse = True)
+
 
     elif sort_by == "desc":
         # this is a list (queried by title) in desc order
-        cards = cards.order_by(Card.likes_count.desc())
+        cards = cards.order_by(Card.likes_count.desc()).all()
         
     elif sort_by == "id":
         # list, queried by id in asc order:
-        cards = cards.order_by(Card.card_id.asc())
+        cards = cards.order_by(Card.card_id.desc())
         # cards = cards.order_by(Card.card_id.asc()).all()  
 
-        card_response = [card.to_json() \
-                for card in cards]
+    card_response = [card.to_json() for card in cards]
+    # card_response = sorted([card.to_json() for card in cards], key = lambda card: card.likes_count)
     return jsonify(card_response), 200
 
 
