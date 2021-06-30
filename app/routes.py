@@ -61,6 +61,8 @@ def update_card(card_id):
     # the like or not click so the cards are there, we still need to 
     # modify card and that's why we query it
 
+    # this works now
+
     card = Card.query.get(card_id)
 
     # we don't need any data in the request body, 
