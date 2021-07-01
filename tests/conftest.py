@@ -48,13 +48,10 @@ def three_boards(app):
     db.session.commit()
     
 # @pytest.fixture
-# def board_cards(app, board_id):
-#     db.session.add_all([
-#         Card(
-#             message="Test Card 1", likes_count=0, board_id=board_id)
-#         )
-#     ])
-#     db.session.commit()
+# def board_body(app):
+
+#     body = {"title": "Test Board 1",
+#     "owner": "tash-force"}
 
 
 

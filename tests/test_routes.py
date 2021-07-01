@@ -50,7 +50,7 @@ def test_get_boards_three_saved_boards(client, three_boards):
         }
     ]
 
-def test_get_view_single_board_by_id(client, three_boards):
+def test_get_single_board_by_id(client, three_boards):
     #Act
     response = client.get("/boards/2")
     #Arrange
@@ -58,10 +58,31 @@ def test_get_view_single_board_by_id(client, three_boards):
     
     #Assert
     assert response.status_code == 200
-    assert len(response_body[2]) == 1
-    assert response_body[2] == [{
+    assert "board_id" in response_body
+    assert response_body == {
             "board_id": 2,
             "owner": "tash-force",
             "title": "Test Board 2"
-        }]
+        }
+
+def test_create_board(client):
+    
+    #Act
+    body = {"title": "Test Board 1",
+    "owner": "tash-force"}
+
+    response = client.post("/boards", json=body)
+
+    #Arrange
+    response_body = response.get_json()
+    
+    #Assert
+    assert response_body == {
+            "board_id": 1,
+            "owner": "tash-force",
+            "title": "Test Board 1"
+        }
+    assert "board_id" in response_body
+    assert "owner" in response_body
+    assert "title" in response_body
 
