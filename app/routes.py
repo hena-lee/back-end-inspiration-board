@@ -23,6 +23,7 @@ def create_board():
                     owner=request_body["owner"])  
     db.session.add(new_board)
     db.session.commit()
+    print(new_board)
     return jsonify(board_id=new_board.board_id, title=new_board.title, owner=new_board.owner), 201
     # return jsonify(board= f'Board \'{new_board.title}\', successfully created'), 201
 
