@@ -16,11 +16,15 @@ def create_board():
     if ("title" not in request_body 
         or "owner" not in request_body): 
         return jsonify(details = f'Invalid data'), 400
+    # new_board = Board(title=request_body["title"],
+    #                 owner=request_body["owner"])  
+
     new_board = Board(title=request_body["title"],
                     owner=request_body["owner"])  
     db.session.add(new_board)
     db.session.commit()
-    return jsonify(board= f'Board \'{new_board.title}\', successfully created'), 201
+    return jsonify(board_id=new_board.board_id, title=new_board.title, owner=new_board.owner), 201
+    # return jsonify(board= f'Board \'{new_board.title}\', successfully created'), 201
 
 @board_bp.route("", methods=["GET"], strict_slashes=False)
 def view_boards():
