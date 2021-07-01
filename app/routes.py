@@ -49,10 +49,10 @@ def create_card_in_board(board_id):
                             board_id=board_id)
     db.session.add(new_card_in_board)
     db.session.commit()
-    # return jsonify(new_card_in_board.to_json()), 200
+    return jsonify(new_card_in_board.to_json()), 200
 
-    return jsonify(card = new_card_in_board.message), 201
-
+    # return jsonify(card = new_card_in_board.message), 201
+    # '{card': 'this is a card message'}
 ###############################################################
 
 @card_bp.route("/<card_id>/like", methods=["PUT"], strict_slashes=False)
